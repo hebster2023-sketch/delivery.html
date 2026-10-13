@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B.B CHURRASCO - Central Delivery</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#121212',
+              card: '#1E1E1E',
+              accent: '#D32F2F', // Vermelho Churrasco
+              fire: '#E65100',   // Laranja Fogo
+              gold: '#FFB300'    // Dourado Brasa
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- FontAwesome Ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-brand-dark text-gray-100 font-sans min-h-screen flex flex-col">
+
+  <!-- CABEÇALHO CENTRAL DELIVERY -->
+  <header class="bg-brand-card border-b border-gray-800 p-4 sticky top-0 z-50 flex justify-between items-center shadow-lg">
+    <div class="flex items-center gap-3">
+      <div class="bg-brand-fire/20 p-2.5 rounded-xl border border-brand-fire/40">
+        <i class="fa-solid fa-motorcycle text-2xl text-brand-fire"></i>
+      </div>
+      <div>
+        <h1 class="font-black text-xl tracking-wider text-brand-gold">B.B CHURRASCO</h1>
+        <p class="text-xs text-gray-400 font-medium">Centralizador de Delivery & Despacho</p>
+      </div>
+    </div>
+    
+    <!-- AÇÕES RÁPIDAS -->
+    <div class="flex items-center gap-3">
+      <button onclick="abrirModalNovoPedido()" class="px-4 py-2 bg-brand-fire hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition-all flex items-center gap-2 shadow-lg shadow-orange-900/30">
+        <i class="fa-solid fa-plus"></i> Novo Pedido Manual
+      </button>
+
+      <a href="index.html" class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-xl text-xs transition-all flex items-center gap-1.5 border border-gray-700">
+        <i class="fa-solid fa-utensils"></i> Salão / Mesas
+      </a>
+    </div>
+  </header>
+
+  <!-- PAINEL KANBAN DELIVERY -->
+  <main class="flex-1 p-4 max-w-[1600px] mx-auto w-full">
+    
+    <!-- BARRA DE FILTROS & RESUMO DO DIA -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div class="bg-brand-card p-3 rounded-xl border border-gray-800 flex justify-between items-center">
+        <div>
+          <p class="text-xs text-gray-400 font-semibold">Total Delivery Hoje</p>
+          <p id="total-vendas-hoje" class="text-xl font-extrabold text-green-400">R$ 0,00</p>
+        </div>
+        <i class="fa-solid fa-sack-dollar text-2xl text-green-500/30"></i>
+      </div>
+
+      <div class="bg-brand-card p-3 rounded-xl border border-gray-800 flex justify-between items-center">
+        <div>
+          <p class="text-xs text-gray-400 font-semibold">Pedidos Concluídos</p>
+          <p id="total-pedidos-concluidos" class="text-xl font-extrabold text-brand-gold">0</p>
+        </div>
+        <i class="fa-solid fa-circle-check text-2xl text-amber-500/30"></i>
+      </div>
+
+      <div class="bg-brand-card p-3 rounded-xl border border-gray-800 flex justify-between items-center">
+        <div>
+          <p class="text-xs text-gray-400 font-semibold">Tempo Médio Preparo</p>
+          <p class="text-xl font-extrabold text-blue-400">25 min</p>
+        </div>
+        <i class="fa-solid fa-stopwatch text-2xl text-blue-500/30"></i>
+      </div>
+
+      <div class="bg-brand-card p-3 rounded-xl border border-gray-800 flex justify-between items-center">
+        <div>
+          <p class="text-xs text-gray-400 font-semibold">Motoboys Ativos</p>
+          <p id="motoboys-ativos" class="text-xl font-extrabold text-purple-400">3 Disponíveis</p>
+        </div>
+        <i class="fa-solid fa-helmet-safety text-2xl text-purple-500/30"></i>
+      </div>
+    </div>
+
+    <!-- COLUNAS KANBAN -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- 1. NOVOS PEDIDOS -->
+      <div class="bg-brand-card rounded-2xl border border-gray-800/80 p-3 flex flex-col">
+        <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-800">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-brand-fire animate-ping"></span>
+            <h2 class="font-black text-sm uppercase tracking-wide text-brand-fire">Novos Pedidos</h2>
+          </div>
+          <span id="badge-novos" class="bg-brand-fire/20 text-brand-fire text-xs px-2.5 py-0.5 rounded-full font-black border border-brand-fire/40">0</span>
+        </div>
+        
+        <div id="coluna-novos" class="space-y-3 flex-1 overflow-y-auto max-h-[70vh] min-h-[300px]">
+          <!-- Exemplo de Card -->
+        </div>
+      </div>
+
+      <!-- 2. EM PREPARO (KDS CHURRASCO/COZINHA) -->
+      <div class="bg-brand-card rounded-2xl border border-gray-800/80 p-3 flex flex-col">
+        <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-800">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-fire text-brand-gold animate-pulse"></i>
+            <h2 class="font-black text-sm uppercase tracking-wide text-brand-gold">Em Preparo</h2>
+          </div>
+          <span id="badge-preparo" class="bg-amber-500/20 text-brand-gold text-xs px-2.5 py-0.5 rounded-full font-black border border-amber-500/40">0</span>
+        </div>
+
+        <div id="coluna-preparo" class="space-y-3 flex-1 overflow-y-auto max-h-[70vh] min-h-[300px]">
+          <!-- Cards em preparo -->
+        </div>
+      </div>
+
+      <!-- 3. EM ROTA / SAIU PARA ENTREGA -->
+      <div class="bg-brand-card rounded-2xl border border-gray-800/80 p-3 flex flex-col">
+        <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-800">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-motorcycle text-blue-400"></i>
+            <h2 class="font-black text-sm uppercase tracking-wide text-blue-400">Em Rota</h2>
+          </div>
+          <span id="badge-rota" class="bg-blue-500/20 text-blue-400 text-xs px-2.5 py-0.5 rounded-full font-black border border-blue-500/40">0</span>
+        </div>
+
+        <div id="coluna-rota" class="space-y-3 flex-1 overflow-y-auto max-h-[70vh] min-h-[300px]">
+          <!-- Cards em rota -->
+        </div>
+      </div>
+
+      <!-- 4. FINALIZADOS -->
+      <div class="bg-brand-card rounded-2xl border border-gray-800/80 p-3 flex flex-col">
+        <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-800">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-green-400"></i>
+            <h2 class="font-black text-sm uppercase tracking-wide text-green-400">Finalizados</h2>
+          </div>
+          <span id="badge-concluidos" class="bg-green-500/20 text-green-400 text-xs px-2.5 py-0.5 rounded-full font-black border border-green-500/40">0</span>
+        </div>
+
+        <div id="coluna-concluidos" class="space-y-3 flex-1 overflow-y-auto max-h-[70vh] min-h-[300px]">
+          <!-- Cards finalizados -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FIREBASE SDKs (Compat v9) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <!-- LÓGICA EM JAVASCRIPT VANILLA -->
+  <script>
+    // 1. CONF DO FIREBASE (Insira as chaves do seu console Firebase)
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "seu-projeto.firebaseapp.com",
+      projectId: "seu-projeto",
+      storageBucket: "seu-projeto.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcdef"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Dados em memória local para simulação e renderização
+    let pedidosDelivery = [
+      {
+        id: "DEL-101",
+        cliente: "Carlos Silva",
+        telefone: "85999998888",
+        endereco: "Rua das Flores, 123 - Bairro Central",
+        origem: "CARDAPIO_PROPRIO",
+        itens: [
+          { nome: "Picanha Completa (2 Pessoas)", qtd: 1, obs: "Carne ao ponto para bem passada", preco: 89.90 },
+          { nome: "Cerveja Heineken 600ml", qtd: 2, obs: "Bem gelada", preco: 30.00 }
+        ],
+        taxaEntrega: 7.00,
+        total: 126.90,
+        formaPagamento: "PIX",
+        status: "NOVO",
+        hora: "19:15"
+      },
+      {
+        id: "DEL-102",
+        cliente: "Mariana Costa",
+        telefone: "85988887777",
+        endereco: "Av. Beira Mar, 450 - Ap 302",
+        origem: "WHATSAPP",
+        itens: [
+          { nome: "Marmitex Churrasco Misto", qtd: 2, obs: "Sem alho no feijão", preco: 50.00 }
+        ],
+        taxaEntrega: 5.00,
+        total: 55.00,
+        formaPagamento: "CARTAO_CREDITO",
+        status: "EM_PREPARO",
+        hora: "19:02"
+      }
+    ];
+
+    // RENDERIZAR OS CARDS NAS COLUNAS
+    function renderizarKanban() {
+      const colNovos = document.getElementById('coluna-novos');
+      const colPreparo = document.getElementById('coluna-preparo');
+      const colRota = document.getElementById('coluna-rota');
+      const colConcluidos = document.getElementById('coluna-concluidos');
+
+      colNovos.innerHTML = '';
+      colPreparo.innerHTML = '';
+      colRota.innerHTML = '';
+      colConcluidos.innerHTML = '';
+
+      let cNovos = 0, cPreparo = 0, cRota = 0, cConcluidos = 0;
+
+      pedidosDelivery.forEach(p => {
+        const cardHtml = criarCardPedidoHTML(p);
+
+        if (p.status === 'NOVO') {
+          colNovos.innerHTML += cardHtml;
+          cNovos++;
+        } else if (p.status === 'EM_PREPARO') {
+          colPreparo.innerHTML += cardHtml;
+          cPreparo++;
+        } else if (p.status === 'EM_ROTA') {
+          colRota.innerHTML += cardHtml;
+          cRota++;
+        } else if (p.status === 'CONCLUIDO') {
+          colConcluidos.innerHTML += cardHtml;
+          cConcluidos++;
+        }
+      });
+
+      document.getElementById('badge-novos').innerText = cNovos;
+      document.getElementById('badge-preparo').innerText = cPreparo;
+      document.getElementById('badge-rota').innerText = cRota;
+      document.getElementById('badge-concluidos').innerText = cConcluidos;
+    }
+
+    // GERADOR DE CARDS VISUAIS
+    function criarCardPedidoHTML(p) {
+      const isNovo = p.status === 'NOVO';
+      const isPreparo = p.status === 'EM_PREPARO';
+      const isRota = p.status === 'EM_ROTA';
+
+      return `
+        <div class="bg-gray-900/90 border border-gray-800 rounded-xl p-3 shadow-md hover:border-gray-700 transition-all">
+          <div class="flex justify-between items-start mb-2 border-b border-gray-800 pb-2">
+            <div>
+              <span class="text-[10px] uppercase font-black px-2 py-0.5 rounded ${
+                p.origem === 'CARDAPIO_PROPRIO' ? 'bg-orange-950 text-orange-400 border border-orange-800' : 'bg-green-950 text-green-400 border border-green-800'
+              }">${p.origem.replace('_', ' ')}</span>
+              <h3 class="font-extrabold text-sm text-gray-100 mt-1">${p.cliente}</h3>
+            </div>
+            <span class="text-xs text-gray-400 font-mono"><i class="fa-regular fa-clock"></i> ${p.hora}</span>
+          </div>
+
+          <p class="text-xs text-gray-400 mb-2 truncate"><i class="fa-solid fa-location-dot text-brand-fire"></i> ${p.endereco}</p>
+
+          <div class="space-y-1 mb-3 bg-brand-dark/50 p-2 rounded-lg border border-gray-800 text-xs">
+            ${p.itens.map(i => `
+              <div class="flex justify-between font-medium">
+                <span>${i.qtd}x${i.nome}</span>
+                <span class="text-gray-400">R$ ${(i.preco * i.qtd).toFixed(2)}</span>
+              </div>
+              ${i.obs ? `<p class="text-[10px] text-amber-400 italic">Obs: ${i.obs}</p>` : ''}
+            `).join('')}
+          </div>
+
+          <div class="flex justify-between items-center mb-3 text-xs border-t border-gray-800 pt-2 font-bold">
+            <span class="text-gray-400">Pagamento: <span class="text-gray-200">${p.formaPagamento}</span></span>
+            <span class="text-brand-gold text-sm font-black">R$ ${p.total.toFixed(2)}</span>
+          </div>
+
+          <!-- BOTÕES DE AÇÃO DO STATUS -->
+          <div class="flex gap-1.5">
+            ${isNovo ? `
+              <button onclick="mudarStatus('${p.id}', 'EM_PREPARO')" class="flex-1 py-1.5 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg text-xs transition-all flex items-center justify-center gap-1">
+                <i class="fa-solid fa-check"></i> Aceitar
+              </button>
+              <button onclick="mudarStatus('${p.id}', 'CANCELADO')" class="px-2.5 py-1.5 bg-red-950 text-red-400 hover:bg-red-900 border border-red-800 font-bold rounded-lg text-xs">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            ` : ''}
+
+            ${isPreparo ? `
+              <button onclick="mudarStatus('${p.id}', 'EM_ROTA')" class="flex-1 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg text-xs transition-all flex items-center justify-center gap-1">
+                <i class="fa-solid fa-motorcycle"></i> Despachar
+              </button>
+            ` : ''}
+
+            ${isRota ? `
+              <button onclick="mudarStatus('${p.id}', 'CONCLUIDO')" class="flex-1 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg text-xs transition-all flex items-center justify-center gap-1">
+                <i class="fa-solid fa-flag-checkered"></i> Entregue
+              </button>
+            ` : ''}
+
+            <button onclick="notificarWhatsApp('${p.id}')" class="px-2.5 py-1.5 bg-green-900/60 hover:bg-green-800 text-green-300 font-bold rounded-lg text-xs border border-green-700" title="Notificar no WhatsApp">
+              <i class="fa-brands fa-whatsapp"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // ALTERAR STATUS DO PEDIDO
+    function mudarStatus(id, novoStatus) {
+      const p = pedidosDelivery.find(item => item.id === id);
+      if (p) {
+        p.status = novoStatus;
+        renderizarKanban();
+      }
+    }
+
+    // DISPARAR NOTIFICAÇÃO DE ZAP PARA O CLIENTE
+    function notificarWhatsApp(id) {
+      const p = pedidosDelivery.find(item => item.id === id);
+      if (!p) return;
+
+      let msg = `Olá *${p.cliente}*! 👋\n\nSeu pedido *#${p.id}* do *B.B CHURRASCO* está com status: `;
+
+      if (p.status === 'EM_PREPARO') msg += `🔥 *EM PREPARO NA CHURRASQUEIRA*!`;
+      else if (p.status === 'EM_ROTA') msg += `🛵 *SAIU PARA ENTREGA*! O motoboy já está a caminho.`;
+      else if (p.status === 'CONCLUIDO') msg += `✅ *ENTREGUE*! Bom apetite!🍖`;
+      else msg += `📝 *RECEBIDO* e aguardando confirmação.`;
+
+      const link = `https://api.whatsapp.com/send?phone=55${p.telefone}&text=${encodeURIComponent(msg)}`;
+      window.open(link, '_blank');
+    }
+
+    // INICIALIZAR
+    window.addEventListener('DOMContentLoaded', () => {
+      renderizarKanban();
+    });
+  </script>
+</body>
+</html>
